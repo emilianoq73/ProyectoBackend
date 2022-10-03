@@ -8,34 +8,27 @@ const listaProductos = new Contenedor("./productos.txt");
 
 
 
-//configurar las rutas
+
 app.get("/", (request, response)=>{
     response.send("<h1 style='color:blue'>Bienvenidos al servidor express</h1>")
 })
 
 
-app.get("/productos", (req,res)=>{
-    listaCompleta()
-    res.send(`Estos son los articulos`)
+app.get("/productos", async(req,res)=>{
+    const productos = await listaProductos.getAll();
+    const totalProductos = JSON.stringify(productos);
+    res.send(`Estos son los articulos: ${totalProductos}`)
 })
 
-app.get("/productoRandom", (req,res)=>{
-    buscaId()
-    res.send("Este es el objeto filtrado")
+app.get("/productoRandom", async(req,res)=>{
+    const productos = await listaProductos.getAll();
+    const numeroAleatorio = parseInt(Math.random() * (productos.length - 0) + 1);
+    const resultadoId = await listaProductos.getById(numeroAleatorio);
+    const resultado = JSON.stringify(resultadoId);
+    res.send(`Este es el articulo buscado con ramdomId: ${resultado}`)
 })
 
-//levantar el servidor
+
 app.listen(8080,()=>{
     console.log("server listening on port 8080")
 })
-
-const listaCompleta = async() =>{
-    const productos = await listaProductos.getAll();
-    console.log(productos);
-}
-const buscaId = async() =>{
-    const cantProd = productos.length();
-    const numeroAleatorio = parseInt(Math.random()*cantProd);
-    const resultadoId = await listaProductos.getById(numeroAleatorio);
-    console.log(resultadoId)
-}
