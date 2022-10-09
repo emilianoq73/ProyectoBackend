@@ -4,6 +4,31 @@ class Contenedor{
     constructor(nameFile){
         this.nameFile = nameFile;
     }
+
+    save = async(product)=>{
+        try {
+            if(fs.existsSync(this.nameFile)){
+                const productos = await this.getAll();
+                const lastIdAdded = productos.reduce((acc,item)=>item.id > acc ? acc = item.id : acc, 0);
+                const newProduct={
+                    id: lastIdAdded+1,
+                    ...product
+                }
+                productos.push(newProduct);
+                await fs.promises.writeFile(this.nameFile, JSON.stringify(productos, null, 2))
+                return productos;
+            } else{
+                const newProduct={
+                    id:1,
+                    ...product
+                }
+
+                await fs.promises.writeFile(this.nameFile, JSON.stringify([newProduct], null, 2));
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
  
     getById = async(id)=>{
         try {
@@ -27,6 +52,31 @@ class Contenedor{
             const contenido = await fs.promises.readFile(this.nameFile,"utf8");
             const productos = JSON.parse(contenido);
             return productos
+        } catch (error) {
+            console.log(error)
+        }
+    }
+    
+    deleteById = async(id)=>{
+        try {
+            const productos = await this.getAll();
+            const newProducts = productos.filter(item=>item.id!==id);
+            await fs.promises.writeFile(this.nameFile, JSON.stringify(newProducts, null, 2));
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    updateById = async(id, body)=>{
+        try {
+            const productos = await this.getAll();
+            const productPos = productos.findIndex(elm=>elm.id === id);
+            productos[productPos] = {
+                id:id,
+                ...body
+            };
+            await fs.promises.writeFile(this.nameFile, JSON.stringify(productos, null, 2))
+            return productos;
         } catch (error) {
             console.log(error)
         }
